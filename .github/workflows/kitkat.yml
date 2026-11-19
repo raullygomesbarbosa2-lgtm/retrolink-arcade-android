@@ -31,9 +31,13 @@ jobs:
           npm run build
           npx cap add android
           cd android
-          sed -i 's/minSdkVersion = 23/minSdkVersion = 19/' variables.gradle
-          sed -i 's/minSdkVersion 23/minSdkVersion 19/g' app/build.gradle
-          ./gradlew assembleDebug
+          echo '--- SDK versions before override ---'
+          grep -RIn 'minSdkVersion' variables.gradle app/build.gradle
+          sed -i -E 's/minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/minSdkVersion = 19/' variables.gradle
+          sed -i -E 's/minSdkVersion[[:space:]]+[0-9]+/minSdkVersion 19/g' app/build.gradle
+          echo '--- SDK versions after override ---'
+          grep -RIn 'minSdkVersion' variables.gradle app/build.gradle
+          ./gradlew assembleDebug --stacktrace
       - name: Publish experimental KitKat APK
         env:
           GH_TOKEN: ${{ github.token }}
