@@ -44,7 +44,7 @@ jobs:
           if 'xmlns:tools=' not in text:
               text = text.replace('<manifest ', '<manifest xmlns:tools="http://schemas.android.com/tools" ', 1)
           if 'tools:overrideLibrary=' not in text:
-              text = text.replace('<application', '<uses-sdk tools:overrideLibrary="androidx.appcompat,androidx.appcompat.resources,androidx.core,androidx.core.splashscreen" />\n    <application', 1)
+              text = text.replace('<application', '<uses-sdk tools:overrideLibrary="androidx.appcompat,androidx.appcompat.resources,androidx.core,androidx.core.splashscreen,androidx.fragment,androidx.activity,androidx.lifecycle,androidx.webkit,androidx.savedstate,androidx.annotation,androidx.collection,androidx.customview,androidx.drawerlayout,androidx.viewpager,androidx.viewpager2,androidx.documentfile,androidx.localbroadcastmanager,androidx.print,androidx.transition,androidx.vectordrawable,androidx.versionedparcelable,androidx.arch.core,androidx.startup,androidx.tracing,androidx.profileinstaller,androidx.window,androidx.recyclerview,androidx.cardview,androidx.cursoradapter,androidx.interpolator,androidx.legacy.coreui,androidx.legacy.coreutils,androidx.swiperefreshlayout,androidx.loader,androidx.media,androidx.navigation,androidx.preference,androidx.sqlite,androidx.room,androidx.work,androidx.security.crypto" />\n    <application', 1)
           manifest.write_text(text)
           PYMANIFEST
           echo '--- manifest override ---'
