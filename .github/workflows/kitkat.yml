@@ -31,6 +31,9 @@ jobs:
           npm run build
           npx cap add android
           cd android
+          # No Cordova plugins are used by this app; omit the generated Cordova bridge
+          # whose current framework requires Android 5.1 (API 22).
+          sed -i '/capacitor-cordova-android-plugins/d' settings.gradle app/build.gradle
           echo '--- SDK versions before override ---'
           grep -RIn 'minSdkVersion' variables.gradle app/build.gradle
           sed -i -E 's/minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/minSdkVersion = 19/' variables.gradle
