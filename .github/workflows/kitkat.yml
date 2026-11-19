@@ -33,9 +33,10 @@ jobs:
           cd android
           # No Cordova plugins are used by this app; omit the generated Cordova bridge
           # whose current framework requires Android 5.1 (API 22).
-          sed -i '/capacitor-cordova-android-plugins/d' settings.gradle app/build.gradle
-          # Keep Gradle's local AAR repository valid after removing Cordova's libs path.
-          printf "\\nrepositories { flatDir { dirs 'src/main/libs' } }\\n" >> app/build.gradle
+          sed -i '/capacitor-cordova-android-plugins/d' settings.gradle
+          # Remove Cordova's local AAR path, but preserve the app's flatDir repository.
+          sed -i "s#'../capacitor-cordova-android-plugins/src/main/libs', ##" app/build.gradle
+          grep -n -A3 -B2 'flatDir' app/build.gradle || true
           echo '--- SDK versions before override ---'
           grep -RIn 'minSdkVersion' variables.gradle app/build.gradle
           sed -i -E 's/minSdkVersion[[:space:]]*=[[:space:]]*[0-9]+/minSdkVersion = 19/' variables.gradle
