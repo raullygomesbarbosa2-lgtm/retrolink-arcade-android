@@ -37,6 +37,18 @@ jobs:
           sed -i -E 's/minSdkVersion[[:space:]]+[0-9]+/minSdkVersion 19/g' app/build.gradle
           echo '--- SDK versions after override ---'
           grep -RIn 'minSdkVersion' variables.gradle app/build.gradle
+          python3 - <<'PYMANIFEST'
+          from pathlib import Path
+          manifest = Path('app/src/main/AndroidManifest.xml')
+          text = manifest.read_text()
+          if 'xmlns:tools=' not in text:
+              text = text.replace('<manifest ', '<manifest xmlns:tools="http://schemas.android.com/tools" ', 1)
+          if 'tools:overrideLibrary=' not in text:
+              text = text.replace('<application', '<uses-sdk tools:overrideLibrary="androidx.appcompat.resources" />\n    <application', 1)
+          manifest.write_text(text)
+          PYMANIFEST
+          echo '--- manifest override ---'
+          grep -nE 'manifest|uses-sdk|overrideLibrary|application' app/src/main/AndroidManifest.xml
           set +e
           ./gradlew assembleDebug --stacktrace --info > ../kitkat-gradle.log 2>&1
           build_status=$?
