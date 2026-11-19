@@ -36,7 +36,7 @@ jobs:
           grep -RIl 'capacitor-cordova-android-plugins' . --include='*.gradle' --include='*.gradle.kts' | xargs -r sed -i '/capacitor-cordova-android-plugins/d'
           # Keep a real local AAR directory after removing generated Cordova references.
           sed -i "s#'../capacitor-cordova-android-plugins/src/main/libs', ##" app/build.gradle
-          mkdir -p app/libs app/src/main/libs
+          mkdir -p app/libs app/src/main/libs app/node_modules/@capacitor/android/capacitor/libs
           grep -RIn 'cordova' app/build.gradle settings.gradle || true
           grep -n -A3 -B2 'flatDir' app/build.gradle || true
           echo '--- SDK versions before override ---'
