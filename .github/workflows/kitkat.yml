@@ -39,6 +39,16 @@ jobs:
           s = s.replace('        cookieManager.flush();', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            cookieManager.flush();\n        }')
           p.write_text(s)
           PYCAP
+          # Guard the Capacitor Cookies plugin's additional API-21-only calls as well.
+          python3 - <<'PYCOOKIES'
+          from pathlib import Path
+          p = Path('node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/CapacitorCookieManager.java')
+          s = p.read_text()
+          s = s.replace('        this.webkitCookieManager.removeSessionCookies(null);', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            this.webkitCookieManager.removeSessionCookies(null);\n        } else {\n            this.webkitCookieManager.removeSessionCookie();\n        }')
+          s = s.replace('        webkitCookieManager.removeAllCookies(null);\n        flush();', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            webkitCookieManager.removeAllCookies(null);\n        } else {\n            webkitCookieManager.removeAllCookie();\n        }\n        flush();')
+          s = s.replace('        webkitCookieManager.flush();', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            webkitCookieManager.flush();\n        }')
+          p.write_text(s)
+          PYCOOKIES
           npx cap add android
           cd android
           # Android 4.4 cannot inflate AndroidX compatibility splash XML/vector resources.
