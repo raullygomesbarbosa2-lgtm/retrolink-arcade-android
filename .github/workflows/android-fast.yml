@@ -22,6 +22,28 @@ jobs:
       - uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+      - name: Warm up free multiplayer relay
+        run: |
+          node - <<'NODE'
+          const url = 'https://retrolink-arcade-relay.onrender.com/api/health';
+          const deadline = Date.now() + 180000;
+          (async () => {
+            let lastError;
+            while (Date.now() < deadline) {
+              try {
+                const response = await fetch(url, { cache: 'no-store' });
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.ok) { console.log('Multiplayer relay awake:', data); process.exit(0); }
+                }
+              } catch (error) { lastError = error; }
+              console.log('Relay ainda acordando; tentando novamente...');
+              await new Promise(resolve => setTimeout(resolve, 10000));
+            }
+            console.error('Relay indisponível após 3 minutos:', lastError);
+            process.exit(1);
+          })();
+          NODE
       - name: Build APK with multiplayer relay configured
         run: |
           mkdir app
@@ -38,4 +60,4 @@ jobs:
         run: |
           mkdir -p output
           cp app/android/app/build/outputs/apk/debug/app-debug.apk output/RetroLink-Arcade.apk
-          gh release create android-fast-${{ github.run_number }} output/RetroLink-Arcade.apk --title 'RetroLink Arcade Android build ${{ github.run_number }}' --notes 'APK compilado com o relay multiplayer configurado, seletor de ROM salva na sala e controles transparentes em tela cheia. Build verificado; não testado em dispositivo físico.'
+          gh release create android-fast-${{ github.run_number }} output/RetroLink-Arcade.apk --title 'RetroLink Arcade Android build ${{ github.run_number }}' --notes 'APK compilado com relay multiplayer ativo e aquecido na publicação; chat, seletor de ROM na sala e controles transparentes em tela cheia. Build verificado, não é um cliente nativo sem WebView; partida real em aparelhos ainda precisa teste.'
