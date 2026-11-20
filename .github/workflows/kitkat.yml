@@ -85,13 +85,13 @@ jobs:
           script: |
             adb install -r app/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell am force-stop com.retrolink.arcade || true
+            adb logcat -c
             adb shell monkey -p com.retrolink.arcade 1
-            sleep 12
-            adb logcat -d -s AndroidRuntime:E ActivityManager:I > kitkat-launch.log
-            if ! adb shell pidof com.retrolink.arcade; then
-              cat kitkat-launch.log
-              exit 1
-            fi
+            sleep 15
+            adb logcat -d -s AndroidRuntime:E > kitkat-launch.log
+            adb shell dumpsys activity > kitkat-activity.txt
+            if grep -q 'FATAL EXCEPTION' kitkat-launch.log; then cat kitkat-launch.log; exit 1; fi
+            if ! grep -q 'com.retrolink.arcade' kitkat-activity.txt; then cat kitkat-activity.txt; exit 1; fi
       - name: Publish experimental KitKat APK
         env:
           GH_TOKEN: ${{ github.token }}
@@ -106,6 +106,7 @@ jobs:
           path: |
             app/kitkat-gradle.log
             kitkat-launch.log
+            kitkat-activity.txt
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: success()
