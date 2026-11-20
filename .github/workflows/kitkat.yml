@@ -29,6 +29,16 @@ jobs:
           cd app
           npm install --no-audit --no-fund
           npm run build
+          # Capacitor 7 calls Android 5+ CookieManager APIs unconditionally; guard them for API 19.
+          python3 - <<'PYCAP'
+          from pathlib import Path
+          p = Path('node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/cordova/CapacitorCordovaCookieManager.java')
+          s = p.read_text()
+          s = s.replace('        cookieManager.setAcceptThirdPartyCookies(webView, true);', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            cookieManager.setAcceptThirdPartyCookies(webView, true);\n        }')
+          s = s.replace('        cookieManager.removeAllCookies(null);', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            cookieManager.removeAllCookies(null);\n        } else {\n            cookieManager.removeAllCookie();\n        }')
+          s = s.replace('        cookieManager.flush();', '        if (android.os.Build.VERSION.SDK_INT >= 21) {\n            cookieManager.flush();\n        }')
+          p.write_text(s)
+          PYCAP
           npx cap add android
           cd android
           # Android 4.4 cannot inflate AndroidX compatibility splash XML/vector resources.
