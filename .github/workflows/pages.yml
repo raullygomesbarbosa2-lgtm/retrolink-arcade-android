@@ -28,7 +28,7 @@ jobs:
           unzip -q input-project.zip -d app
           cd app
           npm install --no-audit --no-fund
-          VITE_PAGES_BASE=/retrolink-arcade-android/ npm run build
+          VITE_PAGES_BASE=/retrolink-arcade-android/ VITE_NETPLAY_URL=${{ vars.VITE_NETPLAY_URL }} npm run build
           touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
