@@ -39,10 +39,9 @@ jobs:
           mkdir -p app/libs app/src/main/libs app/node_modules/@capacitor/android/capacitor/libs
           python3 - <<'PYGRADLE'
           from pathlib import Path
-          import re
           gradle = Path('app/build.gradle')
           text = gradle.read_text()
-          text = re.sub(r'flatDir\\s*\\{\\s*dirs\\s*[^}]*\\}', "flatDir { dirs 'libs', 'src/main/libs' }", text)
+          text = text.replace('flatDir { dirs }', "flatDir { dirs 'libs', 'src/main/libs' }")
           gradle.write_text(text)
           PYGRADLE
           grep -RIn 'cordova' app/build.gradle settings.gradle || true
