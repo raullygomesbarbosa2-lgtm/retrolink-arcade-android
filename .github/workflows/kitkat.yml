@@ -31,6 +31,17 @@ jobs:
           npm run build
           npx cap add android
           cd android
+          # Android 4.4 cannot inflate AndroidX compatibility splash XML/vector resources.
+          # Disable the compatibility splash theme only for this experimental KitKat build.
+          python3 - <<'PYSTYLE'
+          from pathlib import Path
+          p = Path('app/src/main/res/values/styles.xml')
+          if not p.exists():
+              raise SystemExit('Capacitor launch styles.xml not found')
+          s = p.read_text().replace('parent="Theme.SplashScreen"', 'parent="AppTheme.NoActionBar"')
+          p.write_text(s)
+          PYSTYLE
+          grep -n -A4 'NoActionBarLaunch' app/src/main/res/values/styles.xml
           # No Cordova plugins are used by this app; omit the generated Cordova bridge
           # whose current framework requires Android 5.1 (API 22).
           grep -RIl 'capacitor-cordova-android-plugins' . --include='*.gradle' --include='*.gradle.kts' | xargs -r sed -i '/capacitor-cordova-android-plugins/d'
